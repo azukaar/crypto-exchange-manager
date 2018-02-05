@@ -71,7 +71,7 @@ Will return an object containing the following values (all values are string) :
 }
 ```
 
-** Authenticate user
+**Authenticate user**
 
 ```
 Currently supported : 
@@ -86,7 +86,7 @@ const bifinex = new cryptoManager['bifinex']({
 });
 ```
 
-** get wallet
+**get wallet**
 
 ```
 Currently supported : 
@@ -113,7 +113,7 @@ Will return an array of currencies with their value in the wallet.
 ]
 ```
 
-** get wallet
+**get wallet**
 
 ```
 Currently supported : 
