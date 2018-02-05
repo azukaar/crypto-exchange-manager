@@ -1,6 +1,8 @@
 [![CircleCI](https://circleci.com/gh/azukaar/crypto-exchange-manager.svg?style=svg)](https://circleci.com/gh/azukaar/crypto-exchange-manager)
 
-# crypto-manager
+# crypto-exchange-manager
+
+[![NPM](https://nodei.co/npm/crypto-exchange-manager.png)](https://npmjs.org/package/crypto-exchange-manager)
 
 Client for multiple exchanges, supporting tickers informations, as well as additio features as I implement them. 
 
