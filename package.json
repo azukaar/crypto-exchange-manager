@@ -1,6 +1,6 @@
 {
   "name": "crypto-exchange-manager",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Wrapper for cryptocurrencies exchanges apis.",
   "main": "index.js",
   "repository": {
