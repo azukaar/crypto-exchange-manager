@@ -1,52 +1,32 @@
-# coin-ticker
+[![CircleCI](https://circleci.com/gh/azukaar/crypto-manager.svg?style=svg)](https://circleci.com/gh/azukaar/crypto-manager)
 
-Easily get the latest exchange data of Bitcoin, Etherium, Litecoin, and other assets from a variety of exchanges including Bitfinex, Coinbase, Bitstamp, Kraken, Poloniex and others.
+# crypto-manager
 
-[![CircleCI](https://circleci.com/gh/donbobvanbirt/coin-ticker.svg?style=svg)](https://circleci.com/gh/donbobvanbirt/coin-ticker)
+Client for multiple exchanges, supporting tickers informations, as well as additional features as I implement them. 
+
+If you only need tickers (different currencies' values) you can use https://github.com/donbobvanbirt/coin-ticker which is dedicated to ticks information. crypto-manager was first a rewrite of this package so give the original module some love ;)
 
 ## Install
 
 ```bash
-$ npm install coin-ticker
+$ npm install crypto-manager
 ```
 
 ## Usage
 **Require:**
 ```js
-const coinTicker = require('coin-ticker');
+const cryptoManager = require('crypto-manager'); // return an array of available exchanges
 ```
-
-**Syntax:**
-```js
-coinTicker([exchange, assetPair])
-```
-
-**Get available exchanges:**
-
-The coinTicker function with no arguments will return an array of all available exchanges
-```js
-coinTicker()
-// =>
-// [
-//   'bitfinex',
-//   'coinbase',
-//   'bitstamp',
-//   'kraken',
-//   'okcoin',
-//   'exmo',
-//   'bittrex',
-//   'poloniex',
-//   'bitcoinaverage',
-//   'gdax',
-// ]
-```
-
 
 **Get available asset pairs by exchange:**
 
-Declare the exchange and use string 'pairs' to request available asset pairs. coinTicker will return a promise.
+Use the (always implemented) getPairs() method
+
 ```js
-coinTicker('poloniex', 'pairs')
+const cryptoManager = require('crypto-manager');
+const polynex = cryptoManager['polynex'];
+
+polynex.getPairs()
   .then((pairs) => {
     console.log(pairs);
   })
@@ -54,39 +34,25 @@ coinTicker('poloniex', 'pairs')
 // [
 //   'BCN_BTC',
 //   'BELA_BTC',
-//   'BLK_BTC',
-//   'BTCD_BTC',
-//   'BTM_BTC',
-//   'BTS_BTC',
-//   'BURST_BTC',
-//   'CLAM_BTC',
-//   'DASH_BTC',
-//   'DGB_BTC',
-//   'DOGE_BTC',
-//   'EMC2_BTC',
-//   'FLDC_BTC',
-//   'FLO_BTC',
-//   'GAME_BTC',
-//   'GRC_BTC',
-//   'HUC_BTC',
-//   'LTC_BTC',
-//   'MAID_BTC',
-//   'OMNI_BTC',
 //   ...
 // ]
 ```
 
 **Get Ticker Data:**
 
-Simply declare the exchange and asset pair to get the latest market info. coinTicker will return a promise.
+Use the (always implemented) tick() method
+
 ```js
-coinTicker('bitfinex', 'BTC_USD')
-// => Promise
+const cryptoManager = require('crypto-manager');
+const polynex = cryptoManager['polynex'];
+
+polynex.tick('BCN_BTC')
+  .then((tick) => {
+    console.log(tick); // {...}
+  })
 ```
 
-**Response Data:**
-
-An object containing the following values:
+Will return an object containing the following values (all values are string) :
 
 ```js
 {
@@ -102,33 +68,3 @@ An object containing the following values:
   rawData: // the original, unformatted object received from the exchange api. Differs by exchange.
 }
 ```
-
-**Example:**
-```js
-coinTicker('bitfinex', 'BTC_USD')
-   .then((tick) => {
-      console.log(tick)
-   })
-// =>
-// {
-//   last: '1034.8',
-//   ask: '1034.8',
-//   bid: '1034.7',
-//   low: '1001.6',
-//   high: '1040.0',
-//   vol: '15112.8733725',
-//   timestamp: '1486238356.227418953',
-//   exchange: 'bitfinex',
-//   pair: 'BTC_USD',
-//   rawData: { ... }
-// }
-```
-
-
-If you find this package useful, please contribute by donating or opening a pull request.
-
-*BTC:*
-`1Gr9UcXdM5Kmnseht2u29o1SsqMnBkTsYP`
-
-*ETH:*
-`0xc519a1904c5a9D99C13374d22388091B807c54cF`

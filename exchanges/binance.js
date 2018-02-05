@@ -1,10 +1,30 @@
-const axios = require('axios');
+const fetch = require('isomorphic-fetch');
 
-module.exports = (pair) => {
-  const currencyPair = pair.replace('_', '');
-  return axios.get(`https://api.binance.com/api/v1/ticker/24hr?symbol=${currencyPair}`)
+module.exports = class {
+  getPairs() {
+    return fetch('https://api.binance.com/api/v3/ticker/price')
     .then((res) => {
-      const { askPrice, bidPrice, lastPrice, lowPrice, highPrice, volume, timestamp, message } = res.data;
+      return res.json();
+    })
+    .then((res) => {
+      return res.map((currencyPair) => {
+        let pair = currencyPair.symbol.toUpperCase();
+        return pair.slice(0, -3) + '_' + pair.substr(pair.length - 3)
+      })
+    })
+    .catch((err) => {
+      console.error('Error fetching binance pairs:', err);
+    });
+  }
+
+  tick(pair) {
+  const currencyPair = pair.replace('_', '');
+  return fetch(`https://api.binance.com/api/v1/ticker/24hr?symbol=${currencyPair}`)
+    .then((res) => {
+      return res.json();
+    })
+    .then((res) => {
+      const { askPrice, bidPrice, lastPrice, lowPrice, highPrice, volume, timestamp, message } = res;
 
       return {
         last: lastPrice,
@@ -13,13 +33,14 @@ module.exports = (pair) => {
         low: lowPrice,
         high: highPrice,
         vol: volume,
-        timestamp: (new Date()).getTime(),
+        timestamp: ''+(new Date()).getTime(),
         exchange: 'binance',
         pair,
-        rawData: res.data,
+        rawData: res,
       };
     })
     .catch((err) => {
       return 'invalid currency pair';
     });
+  }
 }
