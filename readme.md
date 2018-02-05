@@ -24,7 +24,7 @@ Use the (always implemented) getPairs() method
 
 ```js
 const cryptoManager = require('crypto-exchange-manager');
-const polynex = cryptoManager['polynex'];
+const polynex = new cryptoManager['polynex']();
 
 polynex.getPairs()
   .then((pairs) => {
@@ -44,7 +44,7 @@ Use the (always implemented) tick() method
 
 ```js
 const cryptoManager = require('crypto-exchange-manager');
-const polynex = cryptoManager['polynex'];
+const polynex = new cryptoManager['polynex']();
 
 polynex.tick('BCN_BTC')
   .then((tick) => {
@@ -67,4 +67,73 @@ Will return an object containing the following values (all values are string) :
   pair: // the asset pair, i.e. 'BTC_USD'
   rawData: // the original, unformatted object received from the exchange api. Differs by exchange.
 }
+```
+
+**Authenticate user
+
+```
+Currently supported : 
+  - bifinex
+```
+
+```js
+const cryptoManager = require('crypto-exchange-manager');
+const bifinex = new cryptoManager['bifinex']({
+  key: '123',
+  secret: '123'
+});
+```
+
+**get wallet
+
+```
+Currently supported : 
+  - bifinex
+```
+
+```js
+const cryptoManager = require('crypto-exchange-manager');
+const bifinex = new cryptoManager['bifinex']({
+  key: '123',
+  secret: '123'
+});
+
+bifinex.getWallet().then(result => {
+  console.log(result);
+})
+```
+
+Will return an array of currencies with their value in the wallet.
+
+```
+[
+  {currency: 'ETH', wallet: '1.8'}
+]
+```
+
+**get wallet
+
+```
+Currently supported : 
+  - bifinex
+```
+
+```js
+const cryptoManager = require('crypto-exchange-manager');
+const bifinex = new cryptoManager['bifinex']({
+  key: '123',
+  secret: '123'
+});
+
+bifinex.getBook('ETH').then(result => {
+  console.log(result);
+})
+```
+
+Will return an array of movement in / out of the account of the user for a specific currency.
+
+```
+[
+  {currency: 'ETH', value: '1.8', completed: true, issued: '154787488'}
+]
 ```
