@@ -1,21 +1,21 @@
-[![CircleCI](https://circleci.com/gh/azukaar/crypto-manager.svg?style=svg)](https://circleci.com/gh/azukaar/crypto-manager)
+[![CircleCI](https://circleci.com/gh/azukaar/crypto-exchange-manager.svg?style=svg)](https://circleci.com/gh/azukaar/crypto-exchange-manager)
 
 # crypto-manager
 
-Client for multiple exchanges, supporting tickers informations, as well as additional features as I implement them. 
+Client for multiple exchanges, supporting tickers informations, as well as additio features as I implement them. 
 
 If you only need tickers (different currencies' values) you can use https://github.com/donbobvanbirt/coin-ticker which is dedicated to ticks information. crypto-manager was first a rewrite of this package so give the original module some love ;)
 
 ## Install
 
 ```bash
-$ npm install crypto-manager
+$ npm install crypto-exchange-manager
 ```
 
 ## Usage
 **Require:**
 ```js
-const cryptoManager = require('crypto-manager'); // return an array of available exchanges
+const cryptoManager = require('crypto-exchange-manager'); // return an array of available exchanges
 ```
 
 **Get available asset pairs by exchange:**
@@ -23,7 +23,7 @@ const cryptoManager = require('crypto-manager'); // return an array of available
 Use the (always implemented) getPairs() method
 
 ```js
-const cryptoManager = require('crypto-manager');
+const cryptoManager = require('crypto-exchange-manager');
 const polynex = cryptoManager['polynex'];
 
 polynex.getPairs()
@@ -43,7 +43,7 @@ polynex.getPairs()
 Use the (always implemented) tick() method
 
 ```js
-const cryptoManager = require('crypto-manager');
+const cryptoManager = require('crypto-exchange-manager');
 const polynex = cryptoManager['polynex'];
 
 polynex.tick('BCN_BTC')
