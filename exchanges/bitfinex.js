@@ -1,5 +1,5 @@
 const fetch = require('isomorphic-fetch');
-const crypto = require('crypto')
+const crypto = require('crypto');
 
 module.exports = class {
   constructor(apiKey) {
@@ -59,7 +59,7 @@ module.exports = class {
       });
   }
 
-  getBook(currency) {
+  getExternalMovement(currency) {
     return this.authReq('v2/auth/r/movements/'+currency+'/hist')
       .then(res => {
         return res.map(c => ({

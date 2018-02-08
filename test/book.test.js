@@ -1,6 +1,7 @@
 const cryptoManager = require('../index.js');
 const apiKeys = {
-    'bitfinex' : { key : '123', secret : '456'}
+    'bitfinex' : { key : '123', secret : '456'},
+    'coinbase' : { key : 'Dzp4okNqCVQ4JXII', secret : 'TdhIcqT2WXshtT1ay6FGeZW7Ul1Fiq4S'}
 };
 
 test('Should return array of all available exchanges', () => {

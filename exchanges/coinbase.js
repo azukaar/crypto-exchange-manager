@@ -1,8 +1,14 @@
 const fetch = require('isomorphic-fetch');
+const crypto = require('crypto');
 
 const VERSION_DATE = '2017-06-17';
+let lastNonce = 0;
 
 module.exports = class {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+  }
+
   getPairs() {
     return Promise.resolve([
       'BTC_USD',
@@ -60,5 +66,47 @@ module.exports = class {
       .catch((err) => {
         return 'invalid currency pair';
       });
+  }
+
+  getWallet() {
+    return this.authReq('GET', '/user');
+  }
+
+  authReq(method, uri, body = {}) {
+    if(this.apiKey) {
+      let host = "https://coinbase.com/api/v1";
+      let nonce = Date.parse(new Date());
+      if (lastNonce === 0) lastNonce = nonce - 1;
+      if (lastNonce >= nonce) nonce = lastNonce + 2;
+      lastNonce = nonce;
+
+      let opts = {
+          method: method,
+          uri:    host + uri,
+          headers: {
+              "User-Agent": "node-coinbase-api",
+              "ACCESS_NONCE": nonce
+          }
+      };
+
+      opts["headers"]["ACCESS_KEY"] = this.apiKey.key;
+
+      if (body) {
+          opts.headers["Content-Type"] = "application/json";
+          opts["body"] = JSON.stringify(body);
+      }
+
+
+      let hmac = crypto.createHmac("sha256", this.apiKey.secret);
+      let signature = nonce + opts.uri + (body ? JSON.stringify(body) : "");
+
+      opts["headers"]["ACCESS_SIGNATURE"] = hmac.update(signature).digest("hex");
+
+      return fetch(opts.uri, opts)
+        .then(res => {
+          console.log(res)
+          return res.json()
+        })
+    }
   }
 }
