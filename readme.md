@@ -76,6 +76,7 @@ Will return an object containing the following values (all values are string) :
 ```
 Currently supported : 
   - bifinex
+  - coinbase  
 ```
 
 ```js
@@ -91,6 +92,7 @@ const bifinex = new cryptoManager['bifinex']({
 ```
 Currently supported : 
   - bifinex
+  - coinbase
 ```
 
 ```js
@@ -127,7 +129,7 @@ const bifinex = new cryptoManager['bifinex']({
   secret: '123'
 });
 
-bifinex.getBook('ETH').then(result => {
+bifinex.getBook().then(result => {
   console.log(result);
 })
 ```
@@ -136,6 +138,6 @@ Will return an array of movement in / out of the account of the user for a speci
 
 ```
 [
-  {currency: 'ETH', value: '1.8', completed: true, issued: '154787488'}
+  {currency: 'ETH', value: '1.8', completed: true, timestamp: '154787488'}
 ]
 ```
