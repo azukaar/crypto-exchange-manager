@@ -1,8 +1,9 @@
 const fetch = require('isomorphic-fetch');
 const crypto = require('crypto');
+const {convertToUSDIfPossible} = require('../utils');
 
 const wait = (...args) => new Promise((resolve, reject) => {
-  setTimeout( () => resolve(...args), 100)
+  setTimeout( () => resolve(...args), 1000)
 });
 
 module.exports = class {
@@ -64,21 +65,38 @@ module.exports = class {
       });
   }
 
-  getBook(currency) {
+  getBook() {
+    let finalResult = [];
+    let finalResultConverted = [];
     return this.getWallet().then(tab => Promise.all(tab.map(r => {
       return wait()
         .then(() => {
           return this.authReq('v2/auth/r/movements/'+r.currency+'/hist')
         })
         .then(res => {
-          return res.map(c => ({
-            currency: c[1],
-            value: c[12],
-            completed: c[9] === 'COMPLETED',
-            timestamp: ''+(c[5] / 1000)
-          }));
+          res.map(c => {
+            finalResult.push({
+              currency: c[1],
+              value: c[12],
+              completed: c[9] === 'COMPLETED',
+              timestamp: ''+(c[5] / 1000)
+            });
+          });
+        })
+        .then((res) => {
+            return Promise.all(finalResult.map(r => {
+                const oldR = Object.assign({}, r);
+                return convertToUSDIfPossible(r).then(newR => {
+                  oldR.nativeCurrency = newR.currency;
+                  oldR.nativeValue = newR.value;
+                  finalResultConverted.push(oldR);
+                })
+            }))
         })
     })))
+    .then(() => {
+      return finalResultConverted;
+    });
   }
 
   authReq(path, body = {}, retry = 0) {

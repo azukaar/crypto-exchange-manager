@@ -115,11 +115,12 @@ Will return an array of currencies with their value in the wallet.
 ]
 ```
 
-**get wallet**
+**get book**
 
 ```
 Currently supported : 
   - bifinex
+  - coinbase
 ```
 
 ```js
@@ -134,10 +135,20 @@ bifinex.getBook().then(result => {
 })
 ```
 
-Will return an array of movement in / out of the account of the user for a specific currency.
+Will return an array of movement in / out of the account of the user for a specific currency. Native value and currency are values in USD (calculated with historical values).
 
 ```
 [
-  {currency: 'ETH', value: '1.8', completed: true, timestamp: '154787488'}
+  {
+    currency: 'ETH',
+    value: '1.8',
+    completed: true,
+    timestamp: '154787488',
+    nativeCurrency: 'USD',
+    nativeValue: 500,
+  }
 ]
 ```
+
+**Utils**
+

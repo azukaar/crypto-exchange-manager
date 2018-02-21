@@ -95,8 +95,10 @@ module.exports = class {
         account.map(r => {
           finalResult.push({
             value:  r.amount.amount,
+            nativeValue:  r.native_amount.amount,
             completed:  r.completed,
             currency:  r.amount.currency,
+            nativeCurrency: r.native_amount.currency,
             timestamp:  r.updated_at
           });
         })
