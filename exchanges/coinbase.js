@@ -69,43 +69,77 @@ module.exports = class {
   }
 
   getWallet() {
-    return this.authReq('GET', '/user');
+    return this.authReq('GET', 'accounts')
+      .then(result => {
+        result = result.map(r => {
+          r.wallet = r.balance.amount;
+          delete r.balance;
+          delete r.resource_path;
+          delete r.resource;
+          delete r.primary;
+          delete r.native_balance;
+          delete r.created_at;
+          return r;
+        });
+        return result;
+      })
   }
 
-  authReq(method, uri, body = {}) {
+  getBook() {
+    return this.getWallet().then(tab => Promise.all(tab.map(r => {
+      return this.authReq('GET', `accounts/${r.id}/transactions`);
+    }))).then(result => {
+      const finalResult = [];
+      
+      result.map(account => {
+        account.map(r => {
+          finalResult.push({
+            value:  r.amount.amount,
+            completed:  r.completed,
+            currency:  r.amount.currency,
+            timestamp:  r.updated_at
+          });
+        })
+      });
+
+      return finalResult;
+    });
+  }
+
+  authReq(method, uri, body) {
     if(this.apiKey) {
-      let host = "https://coinbase.com/api/v1";
-      let nonce = Date.parse(new Date());
-      if (lastNonce === 0) lastNonce = nonce - 1;
-      if (lastNonce >= nonce) nonce = lastNonce + 2;
-      lastNonce = nonce;
+      let host = "https://api.coinbase.com/v2/";
+      let nonce = Math.floor(Date.now() / 1000);;
 
       let opts = {
           method: method,
           uri:    host + uri,
           headers: {
-              "User-Agent": "node-coinbase-api",
-              "ACCESS_NONCE": nonce
+              "CB-ACCESS-TIMESTAMP": nonce,
+              'CB-VERSION': '2016-02-18'
           }
       };
 
-      opts["headers"]["ACCESS_KEY"] = this.apiKey.key;
+      opts["headers"]["CB-ACCESS-KEY"] = this.apiKey.key;
+
+      let bodyStr = body ? JSON.stringify(body) : '';
 
       if (body) {
           opts.headers["Content-Type"] = "application/json";
-          opts["body"] = JSON.stringify(body);
+          opts["body"] = bodyStr;
       }
 
 
       let hmac = crypto.createHmac("sha256", this.apiKey.secret);
-      let signature = nonce + opts.uri + (body ? JSON.stringify(body) : "");
+      let signature = nonce + opts.method + '/v2/' + uri + bodyStr;
 
-      opts["headers"]["ACCESS_SIGNATURE"] = hmac.update(signature).digest("hex");
+      opts["headers"]["CB-ACCESS-SIGN"] = hmac.update(signature).digest("hex");
 
       return fetch(opts.uri, opts)
         .then(res => {
-          console.log(res)
-          return res.json()
+          return res.json(); 
+        }).then( (r) => {
+          return r.data;
         })
     }
   }
