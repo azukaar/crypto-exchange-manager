@@ -74,8 +74,8 @@ module.exports = class {
           return this.authReq('v2/auth/r/movements/'+r.currency+'/hist')
         })
         .then(res => {
-          res.map(c => {
-            finalResult.push({
+          return res.map(c => {
+            return ({
               currency: c[1],
               value: c[12],
               completed: c[9] === 'COMPLETED',
@@ -84,7 +84,7 @@ module.exports = class {
           });
         })
         .then((res) => {
-            return Promise.all(finalResult.map(r => {
+            return Promise.all(res.map(r => {
                 const oldR = Object.assign({}, r);
                 return convertToUSDIfPossible(r).then(newR => {
                   oldR.nativeCurrency = newR.currency;
