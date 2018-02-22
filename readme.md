@@ -152,3 +152,12 @@ Will return an array of movement in / out of the account of the user for a speci
 
 **Utils**
 
+Convert values of currency (live or historical).
+
+```js
+convertToUSDIfPossible({
+  value : 1,
+  currency : 'ETH',
+  timestamp : '1519293784' (optionnal)
+})
+```
