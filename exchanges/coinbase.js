@@ -1,8 +1,14 @@
 const fetch = require('isomorphic-fetch');
+const crypto = require('crypto');
 
 const VERSION_DATE = '2017-06-17';
+let lastNonce = 0;
 
 module.exports = class {
+  constructor(apiKey) {
+    this.apiKey = apiKey;
+  }
+
   getPairs() {
     return Promise.resolve([
       'BTC_USD',
@@ -60,5 +66,83 @@ module.exports = class {
       .catch((err) => {
         return 'invalid currency pair';
       });
+  }
+
+  getWallet() {
+    return this.authReq('GET', 'accounts')
+      .then(result => {
+        result = result.map(r => {
+          r.wallet = r.balance.amount;
+          delete r.balance;
+          delete r.resource_path;
+          delete r.resource;
+          delete r.primary;
+          delete r.native_balance;
+          delete r.created_at;
+          return r;
+        });
+        return result;
+      })
+  }
+
+  getBook() {
+    return this.getWallet().then(tab => Promise.all(tab.map(r => {
+      return this.authReq('GET', `accounts/${r.id}/transactions`);
+    }))).then(result => {
+      const finalResult = [];
+      
+      result.map(account => {
+        account.map(r => {
+          finalResult.push({
+            value:  r.amount.amount,
+            nativeValue:  r.native_amount.amount,
+            completed:  r.completed,
+            currency:  r.amount.currency,
+            nativeCurrency: r.native_amount.currency,
+            timestamp:  r.updated_at
+          });
+        })
+      });
+
+      return finalResult;
+    });
+  }
+
+  authReq(method, uri, body) {
+    if(this.apiKey) {
+      let host = "https://api.coinbase.com/v2/";
+      let nonce = Math.floor(Date.now() / 1000);;
+
+      let opts = {
+          method: method,
+          uri:    host + uri,
+          headers: {
+              "CB-ACCESS-TIMESTAMP": nonce,
+              'CB-VERSION': '2016-02-18'
+          }
+      };
+
+      opts["headers"]["CB-ACCESS-KEY"] = this.apiKey.key;
+
+      let bodyStr = body ? JSON.stringify(body) : '';
+
+      if (body) {
+          opts.headers["Content-Type"] = "application/json";
+          opts["body"] = bodyStr;
+      }
+
+
+      let hmac = crypto.createHmac("sha256", this.apiKey.secret);
+      let signature = nonce + opts.method + '/v2/' + uri + bodyStr;
+
+      opts["headers"]["CB-ACCESS-SIGN"] = hmac.update(signature).digest("hex");
+
+      return fetch(opts.uri, opts)
+        .then(res => {
+          return res.json(); 
+        }).then( (r) => {
+          return r.data;
+        })
+    }
   }
 }

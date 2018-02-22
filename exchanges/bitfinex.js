@@ -1,5 +1,10 @@
 const fetch = require('isomorphic-fetch');
-const crypto = require('crypto')
+const crypto = require('crypto');
+const {convertToUSDIfPossible} = require('../utils');
+
+const wait = (...args) => new Promise((resolve, reject) => {
+  setTimeout( () => resolve(...args), 1000)
+});
 
 module.exports = class {
   constructor(apiKey) {
@@ -50,31 +55,54 @@ module.exports = class {
   }
 
   getWallet() {
-    return this.authReq('v2/auth/r/wallets')
+    return wait()
+      .then(() => this.authReq('v2/auth/r/wallets'))
       .then(res => {
-        return res.map(p => ({
-          currency: p[1],
-          wallet: p[2]
-        }))
+          return res.map(p => ({
+            currency: p[1],
+            wallet: p[2]
+          }))
       });
   }
 
-  getBook(currency) {
-    return this.authReq('v2/auth/r/movements/'+currency+'/hist')
-      .then(res => {
-        return res.map(c => ({
-          currency: c[1],
-          value: c[12],
-          completed: c[9] === 'COMPLETED',
-          issued: ''+(c[5] / 1000)
-        }));
-      })
+  getBook() {
+    let finalResult = [];
+    let finalResultConverted = [];
+    return this.getWallet().then(tab => Promise.all(tab.map(r => {
+      return wait()
+        .then(() => {
+          return this.authReq('v2/auth/r/movements/'+r.currency+'/hist')
+        })
+        .then(res => {
+          res.map(c => {
+            finalResult.push({
+              currency: c[1],
+              value: c[12],
+              completed: c[9] === 'COMPLETED',
+              timestamp: ''+(c[5] / 1000)
+            });
+          });
+        })
+        .then((res) => {
+            return Promise.all(finalResult.map(r => {
+                const oldR = Object.assign({}, r);
+                return convertToUSDIfPossible(r).then(newR => {
+                  oldR.nativeCurrency = newR.currency;
+                  oldR.nativeValue = newR.value;
+                  finalResultConverted.push(oldR);
+                })
+            }))
+        })
+    })))
+    .then(() => {
+      return finalResultConverted;
+    });
   }
 
-  authReq(path, body = {}) {
+  authReq(path, body = {}, retry = 0) {
     if(this.apiKey) {
       const apiPath = path;
-      const nonce = Date.now().toString()
+      const nonce = ''+((new Date()).getTime() * 1000 + 2000)
       let signature = `/api/${apiPath}${nonce}${JSON.stringify(body)}`
 
       signature = crypto
@@ -98,6 +126,20 @@ module.exports = class {
       return fetch(`https://api.bitfinex.com/${apiPath}`, request)
         .then(res => {
           return res.json()
+        })
+        .then(res => {
+          if(res[0] === 'error') {
+            console.error('Error while retrieving BitFinex result. retrying...')
+            if(retry < 3)
+              return wait().then(() => this.authReq(path, body, retry + 1))
+            else {
+              console.error('Error while retrieving BitFinex result. To many retry. Abort.')
+              return [];
+            }
+          } 
+          else {
+            return res;
+          }
         })
     }
   }
